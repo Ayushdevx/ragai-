@@ -10,6 +10,18 @@ export default defineConfig({
   build: {
     outDir: "build",
     chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      external: [
+        'fs',
+        'path',
+        'os',
+        'crypto',
+        'stream',
+        'util',
+        'events',
+        'buffer'
+      ]
+    }
   },
   plugins: [tsconfigPaths(), react(), tagger()],
   server: {
@@ -17,5 +29,12 @@ export default defineConfig({
     host: "0.0.0.0",
     strictPort: true,
     allowedHosts: ['.amazonaws.com', '.builtwithrocket.new']
+  },
+  define: {
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    exclude: ['pdf-parse'],
+    include: ['tesseract.js', 'mammoth', 'markdown-it']
   }
 });

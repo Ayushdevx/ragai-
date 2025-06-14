@@ -38,7 +38,7 @@ const ConversationHistory = () => {
       title: 'Financial Report Analysis Q3 2024',
       preview: `Can you analyze the key financial metrics from our Q3 report? I'm particularly interested in revenue growth and expense patterns.
 
-The Q3 2024 financial report shows strong revenue growth of 23% compared to Q2, with total revenue reaching $2.4M. Key highlights include improved gross margins and controlled operational expenses.`,
+The Q3 2025 financial report shows strong revenue growth of 23% compared to Q2, with total revenue reaching $2.4M. Key highlights include improved gross margins and controlled operational expenses.`,
       timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
       messageCount: 12,
       documents: [

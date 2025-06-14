@@ -158,7 +158,7 @@ const Sidebar = () => {
               
               <div className="text-xs text-text-secondary text-center">
                 <p>DocuAI v2.1.0</p>
-                <p>© 2024 All rights reserved</p>
+                <p>© 2025 All rights reserved</p>
               </div>
             </div>
           ) : (
