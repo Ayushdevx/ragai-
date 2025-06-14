@@ -9,6 +9,7 @@ import FilterSidebar from './components/FilterSidebar';
 import SearchBar from './components/SearchBar';
 import ExportModal from './components/ExportModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
+import WebsiteCloner from 'components/WebsiteCloner';
 
 const ConversationHistory = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const ConversationHistory = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [sortBy, setSortBy] = useState('newest');
+  const [activeTab, setActiveTab] = useState('conversations'); // Add tab state
 
   // Mock conversation data
   const mockConversations = [
@@ -336,10 +338,10 @@ Based on your requirements, here's a comprehensive project timeline spanning 16 
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-text-primary mb-2">
-                  Conversation History
+                  AI Assistant Hub
                 </h1>
                 <p className="text-text-secondary">
-                  Browse and manage your AI conversation history
+                  Browse conversation history and clone websites with AI
                 </p>
               </div>
               
@@ -353,229 +355,287 @@ Based on your requirements, here's a comprehensive project timeline spanning 16 
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* Search and Filters */}
-          <div className="mb-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1">
-                <SearchBar 
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  placeholder="Search conversations, documents, or topics..."
-                />
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => setIsFilterSidebarOpen(!isFilterSidebarOpen)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors duration-200 ${
-                    getActiveFiltersCount() > 0
-                      ? 'bg-primary-50 border-primary text-primary' :'bg-surface border-border text-text-secondary hover:text-text-primary hover:bg-secondary-50'
-                  }`}
-                >
-                  <Icon name="Filter" size={18} />
-                  <span>Filters</span>
-                  {getActiveFiltersCount() > 0 && (
-                    <span className="px-2 py-1 text-xs bg-primary text-white rounded-full">
-                      {getActiveFiltersCount()}
-                    </span>
-                  )}
-                </button>
-
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-2 bg-surface border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                  <option value="mostActive">Most Active</option>
-                  <option value="alphabetical">Alphabetical</option>
-                </select>
-              </div>
+            
+            {/* Tab Navigation */}
+            <div className="flex border-b border-border mt-6">
+              <button
+                onClick={() => setActiveTab('conversations')}
+                className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+                  activeTab === 'conversations'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                <Icon name="MessageSquare" size={18} className="inline mr-2" />
+                Conversations
+              </button>
+              <button
+                onClick={() => setActiveTab('website-cloner')}
+                className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+                  activeTab === 'website-cloner'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                <Icon name="Code" size={18} className="inline mr-2" />
+                Website Cloner
+              </button>
             </div>
-
-            {/* Active Filters Display */}
-            {getActiveFiltersCount() > 0 && (
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <span className="text-sm text-text-secondary">Active filters:</span>
-                {selectedFilters.dateRange !== 'all' && (
-                  <span className="px-3 py-1 bg-primary-100 text-primary text-sm rounded-full flex items-center space-x-1">
-                    <span>Date: {selectedFilters.dateRange}</span>
-                    <button
-                      onClick={() => setSelectedFilters(prev => ({ ...prev, dateRange: 'all' }))}
-                      className="hover:bg-primary-200 rounded-full p-0.5"
-                    >
-                      <Icon name="X" size={12} />
-                    </button>
-                  </span>
-                )}
-                {selectedFilters.documentType !== 'all' && (
-                  <span className="px-3 py-1 bg-primary-100 text-primary text-sm rounded-full flex items-center space-x-1">
-                    <span>Type: {selectedFilters.documentType}</span>
-                    <button
-                      onClick={() => setSelectedFilters(prev => ({ ...prev, documentType: 'all' }))}
-                      className="hover:bg-primary-200 rounded-full p-0.5"
-                    >
-                      <Icon name="X" size={12} />
-                    </button>
-                  </span>
-                )}
-                {selectedFilters.topicTags.map(tag => (
-                  <span key={tag} className="px-3 py-1 bg-primary-100 text-primary text-sm rounded-full flex items-center space-x-1">
-                    <span>Tag: {tag}</span>
-                    <button
-                      onClick={() => setSelectedFilters(prev => ({ 
-                        ...prev, 
-                        topicTags: prev.topicTags.filter(t => t !== tag) 
-                      }))}
-                      className="hover:bg-primary-200 rounded-full p-0.5"
-                    >
-                      <Icon name="X" size={12} />
-                    </button>
-                  </span>
-                ))}
-                <button
-                  onClick={clearAllFilters}
-                  className="px-3 py-1 text-sm text-text-secondary hover:text-text-primary underline"
-                >
-                  Clear all
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="flex gap-6">
-            {/* Filter Sidebar */}
-            {isFilterSidebarOpen && (
-              <div className="w-80 flex-shrink-0">
-                <FilterSidebar
-                  selectedFilters={selectedFilters}
-                  setSelectedFilters={setSelectedFilters}
-                  conversations={conversations}
-                  onClose={() => setIsFilterSidebarOpen(false)}
-                />
-              </div>
-            )}
-
-            {/* Main Content */}
-            <div className="flex-1">
-              {/* Bulk Actions */}
-              {selectedConversations.length > 0 && (
-                <div className="mb-4 p-4 bg-primary-50 border border-primary-200 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-primary">
-                      {selectedConversations.length} conversation{selectedConversations.length !== 1 ? 's' : ''} selected
-                    </span>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => setIsExportModalOpen(true)}
-                        className="flex items-center space-x-1 px-3 py-1 text-sm text-primary hover:bg-primary-100 rounded transition-colors duration-200"
-                      >
-                        <Icon name="Download" size={16} />
-                        <span>Export</span>
-                      </button>
-                      <button
-                        onClick={handleBulkDelete}
-                        className="flex items-center space-x-1 px-3 py-1 text-sm text-error hover:bg-error-50 rounded transition-colors duration-200"
-                      >
-                        <Icon name="Trash2" size={16} />
-                        <span>Delete</span>
-                      </button>
-                      <button
-                        onClick={() => setSelectedConversations([])}
-                        className="flex items-center space-x-1 px-3 py-1 text-sm text-text-secondary hover:bg-secondary-100 rounded transition-colors duration-200"
-                      >
-                        <Icon name="X" size={16} />
-                        <span>Clear</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Results Summary */}
-              <div className="mb-4 flex items-center justify-between">
-                <div className="text-sm text-text-secondary">
-                  {filteredConversations.length} conversation{filteredConversations.length !== 1 ? 's' : ''} found
-                  {searchQuery && ` for "${searchQuery}"`}
+          </div>          {/* Search and Filters - only show for conversations tab */}
+          {activeTab === 'conversations' && (
+            <div className="mb-6">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1">
+                  <SearchBar 
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    placeholder="Search conversations, documents, or topics..."
+                  />
                 </div>
                 
-                {filteredConversations.length > 0 && (
+                <div className="flex items-center space-x-3">
                   <button
-                    onClick={handleSelectAll}
-                    className="text-sm text-primary hover:text-primary-700 transition-colors duration-200"
+                    onClick={() => setIsFilterSidebarOpen(!isFilterSidebarOpen)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors duration-200 ${
+                      getActiveFiltersCount() > 0
+                        ? 'bg-primary-50 border-primary text-primary' :'bg-surface border-border text-text-secondary hover:text-text-primary hover:bg-secondary-50'
+                    }`}
                   >
-                    {selectedConversations.length === filteredConversations.length ? 'Deselect All' : 'Select All'}
+                    <Icon name="Filter" size={18} />
+                    <span>Filters</span>
+                    {getActiveFiltersCount() > 0 && (
+                      <span className="px-2 py-1 text-xs bg-primary text-white rounded-full">
+                        {getActiveFiltersCount()}
+                      </span>
+                    )}
                   </button>
-                )}
+
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-4 py-2 bg-surface border border-border rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="mostActive">Most Active</option>
+                    <option value="alphabetical">Alphabetical</option>
+                  </select>
+                </div>
               </div>
 
-              {/* Conversations List */}
-              {filteredConversations.length > 0 ? (
-                <div className="space-y-4">
-                  {filteredConversations.map((conversation) => (
-                    <ConversationCard
-                      key={conversation.id}
-                      conversation={conversation}
-                      isSelected={selectedConversations.includes(conversation.id)}
-                      onSelect={handleConversationSelect}
-                      onContinue={handleContinueConversation}
-                      onDelete={handleDeleteConversation}
-                      onStarToggle={handleStarToggle}
-                      searchQuery={searchQuery}
-                    />
+              {/* Active Filters Display */}
+              {getActiveFiltersCount() > 0 && (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <span className="text-sm text-text-secondary">Active filters:</span>
+                  {selectedFilters.dateRange !== 'all' && (
+                    <span className="px-3 py-1 bg-primary-100 text-primary text-sm rounded-full flex items-center space-x-1">
+                      <span>Date: {selectedFilters.dateRange}</span>
+                      <button
+                        onClick={() => setSelectedFilters(prev => ({ ...prev, dateRange: 'all' }))}
+                        className="hover:bg-primary-200 rounded-full p-0.5"
+                      >
+                        <Icon name="X" size={12} />
+                      </button>
+                    </span>
+                  )}
+                  {selectedFilters.documentType !== 'all' && (
+                    <span className="px-3 py-1 bg-primary-100 text-primary text-sm rounded-full flex items-center space-x-1">
+                      <span>Type: {selectedFilters.documentType}</span>
+                      <button
+                        onClick={() => setSelectedFilters(prev => ({ ...prev, documentType: 'all' }))}
+                        className="hover:bg-primary-200 rounded-full p-0.5"
+                      >
+                        <Icon name="X" size={12} />
+                      </button>
+                    </span>
+                  )}
+                  {selectedFilters.topicTags.map(tag => (
+                    <span key={tag} className="px-3 py-1 bg-primary-100 text-primary text-sm rounded-full flex items-center space-x-1">
+                      <span>Tag: {tag}</span>
+                      <button
+                        onClick={() => setSelectedFilters(prev => ({ 
+                          ...prev, 
+                          topicTags: prev.topicTags.filter(t => t !== tag) 
+                        }))}
+                        className="hover:bg-primary-200 rounded-full p-0.5"
+                      >
+                        <Icon name="X" size={12} />
+                      </button>
+                    </span>
                   ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-24 h-24 mx-auto bg-secondary-100 rounded-full flex items-center justify-center mb-4">
-                    <Icon name="MessageCircle" size={32} className="text-text-secondary" />
-                  </div>
-                  <h3 className="text-lg font-medium text-text-primary mb-2">
-                    {searchQuery || getActiveFiltersCount() > 0 ? 'No conversations found' : 'No conversations yet'}
-                  </h3>
-                  <p className="text-text-secondary mb-6">
-                    {searchQuery || getActiveFiltersCount() > 0 
-                      ? 'Try adjusting your search or filters to find what you\'re looking for.'
-                      : 'Start your first AI conversation to see your history here.'
-                    }
-                  </p>
                   <button
-                    onClick={() => navigate('/chat-interface')}
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
+                    onClick={clearAllFilters}
+                    className="px-3 py-1 text-sm text-text-secondary hover:text-text-primary underline"
                   >
-                    <Icon name="Plus" size={18} />
-                    <span>Start New Conversation</span>
-                  </button>
-                </div>
-              )}
-
-              {/* Load More */}
-              {hasMore && filteredConversations.length > 0 && (
-                <div className="mt-8 text-center">
-                  <button
-                    onClick={() => {
-                      setLoadingMore(true);
-                      setTimeout(() => setLoadingMore(false), 1000);
-                    }}
-                    disabled={loadingMore}
-                    className="px-6 py-3 bg-surface border border-border text-text-primary rounded-lg hover:bg-secondary-50 transition-colors duration-200 disabled:opacity-50"
-                  >
-                    {loadingMore ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        <span>Loading...</span>
-                      </div>
-                    ) : (
-                      'Load More Conversations'
-                    )}
+                    Clear all
                   </button>
                 </div>
               )}
             </div>
-          </div>
+          )}
+
+          {/* Main Content - conditionally render based on active tab */}
+          {activeTab === 'conversations' ? (
+            <div className="flex gap-6">
+              {/* Filter Sidebar */}
+              {isFilterSidebarOpen && (
+                <div className="w-80 flex-shrink-0">
+                  <FilterSidebar
+                    selectedFilters={selectedFilters}
+                    setSelectedFilters={setSelectedFilters}
+                    conversations={conversations}
+                    onClose={() => setIsFilterSidebarOpen(false)}
+                  />
+                </div>
+              )}
+
+              {/* Main Content */}
+              <div className="flex-1">
+                {/* Tabs */}
+                <div className="mb-4">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setActiveTab('conversations')}
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2
+                        ${activeTab === 'conversations' ? 'bg-primary text-white' : 'bg-secondary-50 text-text-primary hover:bg-secondary-100'}
+                      `}
+                    >
+                      <Icon name="MessageCircle" size={18} />
+                      <span>Conversations</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('starred')}
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2
+                        ${activeTab === 'starred' ? 'bg-primary text-white' : 'bg-secondary-50 text-text-primary hover:bg-secondary-100'}
+                      `}
+                    >
+                      <Icon name="Star" size={18} />
+                      <span>Starred</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Bulk Actions */}
+                {selectedConversations.length > 0 && (
+                  <div className="mb-4 p-4 bg-primary-50 border border-primary-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-primary">
+                        {selectedConversations.length} conversation{selectedConversations.length !== 1 ? 's' : ''} selected
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => setIsExportModalOpen(true)}
+                          className="flex items-center space-x-1 px-3 py-1 text-sm text-primary hover:bg-primary-100 rounded transition-colors duration-200"
+                        >
+                          <Icon name="Download" size={16} />
+                          <span>Export</span>
+                        </button>
+                        <button
+                          onClick={handleBulkDelete}
+                          className="flex items-center space-x-1 px-3 py-1 text-sm text-error hover:bg-error-50 rounded transition-colors duration-200"
+                        >
+                          <Icon name="Trash2" size={16} />
+                          <span>Delete</span>
+                        </button>
+                        <button
+                          onClick={() => setSelectedConversations([])}
+                          className="flex items-center space-x-1 px-3 py-1 text-sm text-text-secondary hover:bg-secondary-100 rounded transition-colors duration-200"
+                        >
+                          <Icon name="X" size={16} />
+                          <span>Clear</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Results Summary */}
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="text-sm text-text-secondary">
+                    {filteredConversations.length} conversation{filteredConversations.length !== 1 ? 's' : ''} found
+                    {searchQuery && ` for "${searchQuery}"`}
+                  </div>
+                  
+                  {filteredConversations.length > 0 && (
+                    <button
+                      onClick={handleSelectAll}
+                      className="text-sm text-primary hover:text-primary-700 transition-colors duration-200"
+                    >
+                      {selectedConversations.length === filteredConversations.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  )}
+                </div>
+
+                {/* Conversations List */}
+                {filteredConversations.length > 0 ? (
+                  <div className="space-y-4">
+                    {filteredConversations.map((conversation) => (
+                      <ConversationCard
+                        key={conversation.id}
+                        conversation={conversation}
+                        isSelected={selectedConversations.includes(conversation.id)}
+                        onSelect={handleConversationSelect}
+                        onContinue={handleContinueConversation}
+                        onDelete={handleDeleteConversation}
+                        onStarToggle={handleStarToggle}
+                        searchQuery={searchQuery}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-24 h-24 mx-auto bg-secondary-100 rounded-full flex items-center justify-center mb-4">
+                      <Icon name="MessageCircle" size={32} className="text-text-secondary" />
+                    </div>
+                    <h3 className="text-lg font-medium text-text-primary mb-2">
+                      {searchQuery || getActiveFiltersCount() > 0 ? 'No conversations found' : 'No conversations yet'}
+                    </h3>
+                    <p className="text-text-secondary mb-6">
+                      {searchQuery || getActiveFiltersCount() > 0 
+                        ? 'Try adjusting your search or filters to find what you\'re looking for.'
+                        : 'Start your first AI conversation to see your history here.'
+                      }
+                    </p>
+                    <button
+                      onClick={() => navigate('/chat-interface')}
+                      className="inline-flex items-center space-x-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
+                    >
+                      <Icon name="Plus" size={18} />
+                      <span>Start New Conversation</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Load More */}
+                {hasMore && filteredConversations.length > 0 && (
+                  <div className="mt-8 text-center">
+                    <button
+                      onClick={() => {
+                        setLoadingMore(true);
+                        setTimeout(() => setLoadingMore(false), 1000);
+                      }}
+                      disabled={loadingMore}
+                      className="px-6 py-3 bg-surface border border-border text-text-primary rounded-lg hover:bg-secondary-50 transition-colors duration-200 disabled:opacity-50"
+                    >
+                      {loadingMore ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                          <span>Loading...</span>
+                        </div>
+                      ) : (
+                        'Load More Conversations'
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* Website Cloner Tab */
+            <div className="max-w-6xl mx-auto">
+              <WebsiteCloner />
+            </div>
+          )}
         </div>
       </div>
 
