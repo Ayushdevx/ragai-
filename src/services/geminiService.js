@@ -1,4 +1,4 @@
-// src/services/geminiService.js
+git commit -m "clone it added"git commit -m "clone it added"// src/services/geminiService.js
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 /**
